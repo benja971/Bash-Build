@@ -1,17 +1,14 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-typedef struct plateau plateau;
-struct plateau
-{
+typedef struct {
     int largeur;
     int hauteur;
     int **map;
-};
+} plateau;
 
 typedef struct batiment batiment;
-struct batiment
-{
+struct batiment {
     int x;
     int y;
     int hauteur;

@@ -3,39 +3,52 @@
 #include "Structs.c"
 #include "Fonctions.c"
 #include <stdbool.h>
+#include <conio.h>
+#include <time.h>
 
-int main()
-{
+int main() {
     bool continuer = true;
     int choix;
     plateau *p = creerPlateau();
     player *j = creerPlayer();
-    liste *listeBats = InsListe();
+    liste *listeBats = insListe();
+    int day = 0;
+
     creerTab2d(&p);
     initTab(&p);
-    while (continuer)
-    {
-        // system("cls");
-        printf("Que voulez vous faire (1: creer un batiment, 2: faire un pret, 0; sauver et quitter):");
-        scanf("%d", &choix);
-        printf("\n");
-        afficherPerso(j);
-        switch (choix)
-        {
-        case 0:
-            printf("Le programme c'est deroule sans problemes.");
-            exit(0);
+    
+    while (continuer) {
+        day++;
 
-        case 1:
-            creerBatiment(p, j, listeBats);
-            break;
+        system("cls");
+        printf("/ Jour %d / %de /\n", day, j->money);
 
-        case 2:
-
-            break;
-        }
         afficherTab(p);
-        viderBuffer();
+
+        printf("Nouveau batiment: b\n");
+        printf("Nouveau pret sur 5 ans: p\n");
+
+        while (!kbhit()) _sleep(100);
+
+        char key = getch();
+        if (key == 'p')
+            j->money *= 3;
+
+        // switch (choix) {
+        // case 0:
+        //     printf("Le programme s'est deroule sans problemes.");
+        //     exit(0);
+
+        // case 1:
+        //     creerBatiment(p, j, listeBats);
+        //     break;
+
+        // case 2:
+
+        //     break;
+        // }
+
+        // viderBuffer();
     }
 
     return 0;
