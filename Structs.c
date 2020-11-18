@@ -15,10 +15,11 @@ struct batiment
     int y;
     int hauteur;
     int largeur;
-    char name[20];
+    int ID;
     int prix;
     int revenus;
-    // batiment *suivant;
+    int actif;
+    batiment *suivant;
 };
 
 typedef struct player player;
@@ -29,8 +30,8 @@ struct player
     int gains;
 };
 
-typedef struct liste_chn liste;
-struct liste_chn
+typedef struct liste liste;
+struct liste
 {
     batiment *tete;
     int nbrBats;

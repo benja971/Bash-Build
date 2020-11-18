@@ -1,14 +1,13 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <conio.h>
 
-void *mallop(size_t size)
-{
+void *mallop(size_t size) {
 	void *p = NULL;
 	p = malloc(size);
 
-	if (p == NULL)
-	{
+	if (p == NULL) {
 		printf("Erreur de memoire.\n");
 		exit(0);
 	}
@@ -16,105 +15,124 @@ void *mallop(size_t size)
 	return p;
 }
 
-void viderBuffer()
-{
+void viderBuffer() {
 	int c = 0;
 	while (c != '\n' && c != EOF)
 		c = getchar();
 }
 
-void choisirTaille(plateau *p)
-{
-	do
-	{
-		printf("De quelle taille voulez-vous que votre plateau soit (10 x 10 mininum) ?\n");
+void choisirTaille(plateau *p) {
+	do {
+        system("cls");
+        printf("De quelle taille voulez-vous que votre plateau soit (10 x 10 mininum) ?\n");
+        
 		printf("Largeur: ");
 		scanf("%d", &(p->largeur));
+
 		printf("Hauteur: ");
 		scanf("%d", &(p->hauteur));
 	} while (p->largeur < 10 || p->hauteur < 10);
 }
 
-liste *insListe()
-{
-	liste *liste = mallop(sizeof(liste)); // déclaration
+liste *insListe() {
+	liste *pl = mallop(sizeof(liste)); // déclaration
 
-	liste->tete = NULL;
-	liste->nbrBats = 0;
+	pl->tete = NULL;
+	pl->nbrBats = 0;
 
-	return liste;
+	return pl;
 }
 
-plateau *creerPlateau()
-{
-	int choix;
-	plateau *p = (plateau *)mallop(sizeof(plateau));
-	printf("Dimensions du tableau de jeu possibles:\n");
-	printf("\t 1: 10 x 10\n");
-	printf("\t 2: 20 x 20\n");
-	printf("\t 3: 20 x 30\n");
-	printf("Quelle dimension voulez vous (1, 2, 3 ou 0 pour choisir votre taille) ?\nChoix : ");
-	scanf("%d", &choix);
+plateau *creerPlateau() {
+	plateau *pp = (plateau *)mallop(sizeof(plateau));
 
-	switch (choix)
-	{
-	case 0:
-		choisirTaille(p);
-		break;
+    int done = 0, choix = 0;
+    while (!done) {
+        system("cls");
 
-	case 1:
-		printf("alive");
-		p->largeur = 10;
-		p->hauteur = 10;
-		break;
+        printf("Dimensions du plateau:\n");
+        printf(choix == 0 ? " > 10 x 10\n" : "   10 x 10\n");
+        printf(choix == 1 ? " > 20 x 20\n" : "   20 x 20\n");
+        printf(choix == 2 ? " > 20 x 30\n" : "   20 x 30\n");
+        printf(choix == 3 ? " > perso\n" : "   perso\n");
 
-	case 2:
-		p->largeur = 20;
-		p->hauteur = 20;
-		printf("alive");
-		break;
+        while (!kbhit())
+            _sleep(1);
 
-	case 3:
-		p->largeur = 20;
-		p->hauteur = 40;
-		printf("alive");
-		break;
+        char key = getch();
+        if (key == 'H' && choix > 0)
+            choix--;
+
+        if (key == 'P' && choix < 3)
+            choix++;
+
+        if (key == '\r')
+            done = 1;
+    }
+
+	switch (choix) {
+    case 0:
+        pp->largeur = 10;
+        pp->hauteur = 10;
+        break;
+
+    case 1:
+        pp->largeur = 20;
+        pp->hauteur = 20;
+        break;
+
+    case 2:
+        pp->largeur = 20;
+        pp->hauteur = 30;
+        break;
+
+    case 3:
+        pp->largeur = 0;
+        pp->hauteur = 0;
+        choisirTaille(pp);
+        break;
 	}
-	return p;
+        
+	return pp;
 }
 
-void creerTab2d(plateau **p)
-{
-	int **tab = (int **)mallop((*p)->largeur * sizeof(int *));
+void creerTab2d(plateau **ppp) {
+	int **tab = (int **)mallop((*ppp)->largeur * sizeof(int *));
 
-	for (int i = 0; i < (*p)->largeur; i++)
-		tab[i] = (int *)mallop((*p)->hauteur * sizeof(int));
+	for (int i = 0; i < (*ppp)->largeur; i++)
+		tab[i] = (int *)mallop((*ppp)->hauteur * sizeof(int));
 
-	(*p)->map = tab;
+	(*ppp)->map = tab;
 }
 
-void initTab(plateau **p)
-{
-	for (int i = 0; i < (*p)->largeur; i++)
-	{
-		for (int j = 0; j < (*p)->hauteur; j++)
-			((*p)->map)[i][j] = 0;
+void refreshTab(plateau *pp, liste *pl) {
+	for (int i = 0; i < pp->largeur; i++) {
+		for (int j = 0; j < pp->hauteur; j++)
+			(pp->map)[i][j] = 0;
+	}
+
+	batiment *pb = pl->tete;
+	while (pb != NULL) {
+		dessinerBat(pp, pb, pb->actif ? 2 : 1);
+		pb = pb->suivant;
 	}
 }
 
-void afficherTab(plateau *p)
-{
+void afficherTab(plateau *pp){
 	printf("\n");
 
-	for (int i = 0; i < p->largeur; i++)
-	{
-		for (int j = 0; j < p->hauteur; j++)
-		{
-			int b = (p->map)[i][j];
-			if (b)
-				printf("%3d", b);
-			else
-				printf("  .");
+	for (int i = 0; i < pp->largeur; i++) {
+		for (int j = 0; j < pp->hauteur; j++) {
+			int mode = (pp->map)[i][j];
+
+			if (mode == 0)
+				printf(" \033[30;1m.\033[0m"); // point vide
+			
+			if (mode == 1)
+				printf(" \033[34;1m#\033[0m"); // batiment à placer
+
+			if (mode == 2)
+				printf(" #"); // batiment
 		}
 
 		printf("\n");
@@ -123,103 +141,117 @@ void afficherTab(plateau *p)
 	printf("\n");
 }
 
-void acheterBatiment(batiment *b, player *p)
-{
-	p->money -= b->prix;
-}
-
-void ajouterBat(plateau **p, batiment *b)
-{
-	for (int i = 0; i < (*p)->largeur; i++)
-	{
-		for (int j = 0; j < (*p)->hauteur; j++)
-		{
-
-			if (b->x == i && b->y == j)
-			{
-				for (int k = i; k < i + b->largeur; k++)
-				{
-					for (int l = j; l < j + b->hauteur; l++)
-						((*p)->map)[l][k] = 1;
-				}
-			}
-		}
+void dessinerBat(plateau *pp, batiment *pb, int mode) {
+	for (int k = pb->x; k < pb->x + pb->largeur; k++) {
+		for (int l = pb->y; l < pb->y + pb->hauteur; l++)
+			(pp->map)[l][k] = mode;
 	}
 }
 
-// void InsFin(liste *liste, plateau *p, player *j, batiment *cb)
-// {
-// 	if (liste->nbrBats == 0)
-// 		liste->tete = cb;
+void InsFin(liste *pl, batiment *pb) {
+	if (pl->nbrBats == 0)
+		pl->tete = pb;
 
-// 	else
-// 	{
-// 		batiment *bb = liste->tete;
-// 		while (bb->suivant != NULL) // parcours de la liste
-// 			bb = bb->suivant;
+	else {
+		batiment *tete = pl->tete;
+		while (tete->suivant != NULL)
+			tete = tete->suivant;
 
-// 		bb->suivant = bb;
-// 	}
-
-// 	liste->nbrBats += 1;
-// }
-
-batiment *creerBatiment(plateau *p, player *j, liste *liste)
-{
-	batiment *b = (batiment *)mallop(sizeof(batiment));
-
-	b->largeur = 3;
-	b->hauteur = 2;
-
-	viderBuffer();
-	printf("Type de batiment: ");
-	fgets(b->name, 19, stdin);
-
-	printf("Position x du batiment: ");
-	scanf("%d", &b->x);
-
-	printf("Position y du batiment: ");
-	scanf("%d", &b->y);
-
-	if (strcmp(b->name, "Banque") == 1 || strcmp(b->name, "banque") == 1)
-	{
-		b->prix = 60;
-		b->largeur = 3;
-		b->hauteur = 3;
-		b->revenus = 0;
+		tete->suivant = pb;
 	}
 
-	if (strcmp(b->name, "Maison") == 1 || strcmp(b->name, "maison") == 1)
-	{
-		b->prix = 40;
-		b->largeur = 3;
-		b->hauteur = 2;
-		b->revenus = 10;
-	}
-
-	// b->suivant = NULL;
-
-	if (b->x + b->largeur > p->largeur || b->y + b->hauteur > p->hauteur)
-		printf("\nImpossible de construire ce batiment ici.\n");
-
-	else if (b->prix > j->money)
-		printf("\nVous n'avez pas suffisement d'argent pour ca.\n");
-
-	else if (b->prix < j->money)
-	{
-		acheterBatiment(b, j);
-		// InsFin(liste, p, j, b);
-		ajouterBat(&p, b);
-		j->gains += b->revenus;
-	}
-
-	return b;
+	pl->nbrBats++;
 }
 
-player *creerPlayer()
-{
+batiment *creerBatiment(plateau *pp, player *pj, liste *pl) {
+	batiment *pb = (batiment *)mallop(sizeof(batiment));
+	pb->suivant = NULL;
+	pb->actif = 0;
+	pb->x = 0;
+    pb->y = 0;
+
+	InsFin(pl, pb);
+
+	int done = 0, choix = 0;
+    while (!done) {
+        system("cls");
+
+	    printf("Type de batiment:\n");
+		printf("%s%s\n", choix == 0 ? " > " : "   ", pj->money >= 60 ? "Banque" : "\033[30;1mBanque\033[0m");
+		printf("%s%s\n", choix == 1 ? " > " : "   ", pj->money >= 40 ? "Maison" : "\033[30;1mMaison\033[0m");
+		printf("%s%s\n", choix == 2 ? " > " : "   ", "Annuler");
+
+        while (!kbhit());
+
+        char key = getch();
+        if (key == 'H' && choix > 0)
+            choix--;
+
+        if (key == 'P' && choix < 2)
+            choix++;
+
+        if (key == '\r' && !(choix == 0 && pj->money < 60) && !(choix == 1 && pj->money < 40))
+            done = 1;
+    }
+
+	if (choix == 0) {
+        pb->ID = 0;
+        pb->prix = 60;
+		pb->largeur = 3;
+		pb->hauteur = 3;
+		pb->revenus = 0;
+	}
+
+	if (choix == 1) {
+        pb->ID = 1;
+		pb->prix = 40;
+		pb->largeur = 3;
+		pb->hauteur = 2;
+		pb->revenus = 10;
+	}
+
+	if (choix == 2)
+		return NULL;
+
+	done = 0;
+    while (!done) {
+        system("cls");
+
+        printf("position:\n");
+        printf("%d, %d\n", pb->x, pb->y);
+
+		refreshTab(pp, pl);
+		afficherTab(pp);
+
+		while (!kbhit());
+
+        char key = getch();
+        if (key == 'H' && pb->y > 0)
+            (pb->y)--;
+
+        if (key == 'P' && pb->y < pp->hauteur - pb->hauteur)
+            (pb->y)++;
+
+        if (key == 'K' && pb->x > 0)
+            (pb->x)--;
+
+        if (key == 'M' && pb->x < pp->largeur - pb->largeur)
+            (pb->x)++;
+
+        if (key == '\r')
+            done = 1;
+    }
+
+	pj->money -= pb->prix;
+	pj->gains += pb->revenus;
+	pb->actif = 1;
+
+	return pb;
+}
+
+player *creerPlayer() {
 	player *j = (player *)mallop(sizeof(player));
-	printf("Quel est votre nom: ");
+	printf("Nom du joueur: ");
 	fgets(j->name, 19, stdin);
 	j->money = 100;
 	j->gains = 0;

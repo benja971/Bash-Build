@@ -6,38 +6,59 @@
 #include <conio.h>
 #include <time.h>
 
-int main()
-{
+int main() {
 	system("cls");
 	int continuer = 1, day = 0;
-	plateau *p = creerPlateau();
-	player *j = creerPlayer();
+	plateau *pp = creerPlateau();
+    printf("\n");
+	player *pj = creerPlayer();
 	liste *listeBats = insListe();
 
-	creerTab2d(&p);
-	initTab(&p);
+    creerTab2d(&pp);
 
-	while (continuer)
-	{
+	while (continuer) {
 		day++;
-		j->money += j->gains;
+		pj->money += pj->gains;
+
 		system("cls");
-		printf("/ Jour %d / %de / +%d par jours/\n", day, j->money, j->gains);
+		printf("/ Jour %d / %de / +%de par jour /\n", day, pj->money, pj->gains);
+		printf("/ Prets /");
+		printf("\n");
 
-		afficherTab(p);
+		refreshTab(pp, listeBats);
+		afficherTab(pp);
 
-		printf("Nouveau batiment: b\n");
-		printf("Nouveau pret sur 5 ans: p\n");
+        printf("Batiments [%d]: ", listeBats->nbrBats);
+        batiment *pb = listeBats->tete;
+        while (pb != NULL) {
+            if (pb->ID == 0)
+                printf("Banque ");
 
-		while (!kbhit())
-			_sleep(100);
+            if (pb->ID == 1)
+                printf("Maison ");
 
-		char key = getch();
-		if (key == 'p')
-			j->money *= 3;
+            pb = pb->suivant;
+        }
+        printf("\n\n");
+        
+
+        printf("[N] Creer batiment\n");
+		printf("[B] Nouveau pret sur 5 ans\n");
+		printf("[P] Passer un jour\n");
+		printf("[Q] Quitter\n");
+		printf("\n");
+
+		while (!kbhit());
+
+        char key = getch();
+		if (key == 'n')
+			creerBatiment(pp, pj, listeBats);
 
 		if (key == 'b')
-			creerBatiment(p, j, listeBats);
+			pj->money *= 3;
+
+		if (key == 'q')
+			continuer = 0;
 	}
 
 	return 0;
