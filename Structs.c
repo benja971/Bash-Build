@@ -19,8 +19,9 @@ struct batiment
     int prix;
     int revenus;
     int enConstruc;
-    int age;
+    int jconst;
     int actif;
+    int lvl;
     batiment *suivant;
 };
 

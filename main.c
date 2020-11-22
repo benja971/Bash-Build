@@ -46,6 +46,7 @@ int main()
 
 		printf("[N] Construire batiment\n");
 		printf("[B] Nouveau pret sur 5 ans\n");
+		printf("[U] Ameliorer un batiment\n");
 		printf("[P] Passer un jour\n");
 		printf("[Q] Quitter\n");
 		printf("\n");
@@ -53,14 +54,17 @@ int main()
 		while (!kbhit())
 			;
 
-		majBat(listeBats);
+		majBat(listeBats, day);
 
 		char key = getch();
 		if (key == 'n')
-			construireBat(pp, pj, listeBats);
+			construireBat(pp, pj, listeBats, day);
 
 		if (key == 'b')
 			pj->money *= 3;
+
+		if (key == 'u')
+			upgrade(listeBats, day, pj);
 
 		if (key == 'q')
 			continuer = 0;

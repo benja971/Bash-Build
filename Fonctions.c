@@ -183,16 +183,17 @@ void InsFin(liste *pl, batiment *pb)
 	pl->nbrBats++;
 }
 
-batiment *construireBat(plateau *pp, player *pj, liste *pl)
+batiment *construireBat(plateau *pp, player *pj, liste *pl, int jour)
 {
 	batiment *pb = (batiment *)mallop(sizeof(batiment));
 	pb->suivant = NULL;
 	pb->actif = 0;
+	pb->lvl = 0;
 	pb->x = 0;
 	pb->y = 0;
+	pb->jconst = jour;
 
 	InsFin(pl, pb);
-
 	int done = 0, choix = 0;
 	while (!done)
 	{
@@ -270,24 +271,23 @@ batiment *construireBat(plateau *pp, player *pj, liste *pl)
 			done = 1;
 		}
 	}
-
-	pj->money -= pb->prix;
-	pj->gains += pb->revenus;
 	pb->enConstruc = 1;
-	pb->age = 0;
+	pj->gains += pb->revenus;
+	pj->money -= pb->prix;
 
 	return pb;
 }
 
-void majBat(liste *pl)
+void majBat(liste *pl, int jours)
 {
 	batiment *cb = pl->tete;
 	while (cb)
 	{
-		cb->age++;
-		if (cb->age > 3 && cb->actif == 0)
+		if (jours - cb->jconst > 2 && cb->actif == 0)
 		{
+			cb->enConstruc = 0;
 			cb->actif = 1;
+			cb->lvl += 1;
 		}
 
 		cb = cb->suivant;
@@ -301,4 +301,41 @@ player *creerPlayer()
 	fgets(j->name, 19, stdin);
 	j->money = 100;
 	j->gains = 0;
+}
+
+void afficherBat(batiment *pb)
+{
+	if (pb->ID == 0)
+		printf("%s\n", "Banque");
+
+	else
+		printf("%s\n", "Maison");
+
+	printf("niveau: %d\n", pb->lvl);
+	printf("revenus: %d\n", pb->revenus);
+}
+
+void upgrade(liste *pl, int jours, player *pj)
+{
+	batiment *cb = pl->tete;
+	char choix;
+
+	while (cb)
+	{
+		afficherBat(cb);
+		printf("Voulez vous améliorer ?(o/n)");
+		scanf("%c", &choix);
+		viderBuffer();
+		if (choix == 'o')
+		{
+			cb->actif = 0;
+			cb->enConstruc = 1;
+			cb->jconst = jours;
+			pj->gains -= cb->revenus;
+			cb->revenus += 10;
+			pj->gains += cb->revenus;
+		}
+		printf("\n");
+		cb = cb->suivant;
+	}
 }
