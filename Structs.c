@@ -18,6 +18,8 @@ struct batiment
     int ID;
     int prix;
     int revenus;
+    int enConstruc;
+    int age;
     int actif;
     batiment *suivant;
 };
