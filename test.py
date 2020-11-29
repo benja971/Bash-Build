@@ -1,7 +1,7 @@
 import random
 
 y = 2
-pn = 1/360
+pn = 1/365
 pm = 1/(100*365)
 dy = 0
 

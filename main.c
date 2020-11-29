@@ -14,8 +14,8 @@ int main()
 	pjeu->nourriture = 0;
 	pjeu->population = 10;
 	pjeu->loges = 0;
-	pjeu->natalite = 1 / 365;
-	pjeu->mortalite = 1 / (100 * 365);
+	pjeu->natalite = 0.5 / 365.0;
+	pjeu->mortalite = 0.3 / 365.0;
 	pjeu->dy = 0;
 	plateau *pp = creerPlateau(pjeu);
 	printf("\n");
@@ -33,13 +33,14 @@ int main()
 		system("cls");
 		printf("/ Jour %d / %de / +%de /\n", pjeu->days, pjeu->pplayer->money, pjeu->pplayer->gains);
 		printf("/ Nourriture %d / %d habitants dont %d loges/\n", pjeu->nourriture, pjeu->population, pjeu->loges);
-		printf("/ Pret [%d]:", listePrets->nbrElements);
+		printf("/ Pret [%d] ", listePrets->nbrElements);
 		afficherPrets(pjeu);
 		printf("\n");
 
 		afficherTab(pjeu);
+		majBat(pjeu);
 		timerPrets(pjeu);
-		evPpop(pjeu);
+		ev_Pop(pjeu);
 		printf("Batiments [%d]: ", listeBats->nbrElements);
 		batiment *pb = listeBats->tete;
 		while (pb != NULL)
@@ -64,8 +65,6 @@ int main()
 
 		while (!kbhit())
 			;
-
-		majBat(pjeu);
 
 		char key = getch();
 		if (key == 'n')

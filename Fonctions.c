@@ -229,7 +229,8 @@ batiment *construireBat(jeu *pjeu)
 		printf("Type de batiment:\n");
 		printf("%s%s\n", choix == 0 ? " > " : "   ", pjeu->pplayer->money >= 60 ? "Banque" : "\033[30;1mBanque\033[0m");
 		printf("%s%s\n", choix == 1 ? " > " : "   ", pjeu->pplayer->money >= 40 ? "Maison" : "\033[30;1mMaison\033[0m");
-		printf("%s%s\n", choix == 2 ? " > " : "   ", "Annuler");
+		printf("%s%s\n", choix == 2 ? " > " : "   ", pjeu->pplayer->money >= 50 ? "Ferme" : "\033[30;1mFerme\033[0m");
+		printf("%s%s\n", choix == 3 ? " > " : "   ", "Annuler");
 
 		while (!kbhit())
 			;
@@ -238,10 +239,10 @@ batiment *construireBat(jeu *pjeu)
 		if (key == 'H' && choix > 0)
 			choix--;
 
-		if (key == 'P' && choix < 2)
+		if (key == 'P' && choix < 3)
 			choix++;
 
-		if (key == '\r' && !(choix == 0 && pjeu->pplayer->money < 60) && !(choix == 1 && pjeu->pplayer->money < 40))
+		if (key == '\r' && !(choix == 0 && pjeu->pplayer->money < 60) && !(choix == 1 && pjeu->pplayer->money < 40) && !(choix == 2 && pjeu->pplayer->money < 50))
 			done = 1;
 	}
 
@@ -264,6 +265,15 @@ batiment *construireBat(jeu *pjeu)
 	}
 
 	if (choix == 2)
+	{
+		pb->ID = 2;
+		pb->prix = 50;
+		pb->largeur = 2;
+		pb->hauteur = 3;
+		pb->revenus = 15;
+	}
+
+	if (choix == 3)
 		return NULL;
 
 	done = 0;
@@ -320,7 +330,7 @@ void afficherPrets(jeu *pjeu)
 	pret *cp = pjeu->plisteP->tete;
 	while (cp)
 	{
-		printf("%d jours restants: %de/", cp->timer, cp->somme);
+		printf(" / %d jours restants: %de", cp->timer, cp->somme);
 		cp = cp->suivant;
 	}
 }
@@ -416,37 +426,26 @@ void retirerDebut(jeu *pjeu)
 
 void rembourserPret(jeu *pjeu)
 {
-	if (pjeu->pplayer->money > pjeu->plisteP->tete->somme && pjeu->plisteP->nbrElements)
+	if (pjeu->pplayer->money > pjeu->plisteP->tete->somme * 1.05 && pjeu->plisteP->nbrElements > 0)
 	{
-		pjeu->pplayer->money -= pjeu->plisteP->tete->somme;
+		pjeu->pplayer->money -= pjeu->plisteP->tete->somme * 1.05;
 		retirerDebut(pjeu);
-	}
-	else
-	{
-		printf("Vous n'avez pas suffisement d'argent pour faire ca ou vous n'avez pas de pret a rembourser.");
-		Sleep(1);
 	}
 }
 
 float random()
 {
-	return (float)rand() / ((float)RAND_MAX);
+	return (float)(rand() % 100000) / 100000.0;
 }
 
-void evPpop(jeu *pjeu)
+void ev_Pop(jeu *pjeu)
 {
 	for (int i = 0; i < pjeu->population; i++)
 	{
 		if (random() < pjeu->natalite)
-		{
 			pjeu->population += 1;
-			printf("%d", pjeu->population);
-			Sleep(1);
-		}
 
 		if (random() < pjeu->mortalite)
-		{
 			pjeu->population -= 1;
-		}
 	}
 }
