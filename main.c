@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
-#include "Structs.c"
-#include "Fonctions.c"
+#include "Structs.h"
+#include "Fonctions.h"
 #include <conio.h>
 #include <time.h>
 
@@ -17,64 +17,62 @@ int main()
 	pjeu->natalite = 0.5 / 365.0;
 	pjeu->mortalite = 0.3 / 365.0;
 	pjeu->dy = 0;
-	plateau *pp = creerPlateau(pjeu);
+	pjeu->prixTerre = 500;
+	creerPlateau(pjeu);
 	printf("\n");
-	player *pj = creerPlayer(pjeu);
-	listeB *listeBats = insListeB(pjeu);
-	listeP *listePrets = insListeP(pjeu);
-
+	creerPlayer(pjeu);
+	insListeE(pjeu);
+	insListeP(pjeu);
 	creerTab2d(pjeu);
+	generer_nonConstr(pjeu);
 
 	while (continuer)
 	{
-		pjeu->days++;
-		pjeu->pplayer->money += pjeu->pplayer->gains;
-
-		system("cls");
-		printf("/ Jour %d / %de / +%de /\n", pjeu->days, pjeu->pplayer->money, pjeu->pplayer->gains);
-		printf("/ Nourriture %d / %d habitants dont %d loges/\n", pjeu->nourriture, pjeu->population, pjeu->loges);
-		printf("/ Pret [%d] ", listePrets->nbrElements);
-		afficherPrets(pjeu);
-		printf("\n");
-
-		afficherTab(pjeu);
-		majBat(pjeu);
-		timerPrets(pjeu);
-		ev_Pop(pjeu);
-		printf("Batiments [%d]: ", listeBats->nbrElements);
-		batiment *pb = listeBats->tete;
-		while (pb != NULL)
-		{
-			if (pb->ID == 0)
-				printf("Banque ");
-
-			if (pb->ID == 1)
-				printf("Maison ");
-
-			pb = pb->suivant;
-		}
-		printf("\n\n");
-
-		printf("[N] Construire batiment\n");
-		printf("[B] Nouveau pret sur 5 ans\n");
-		printf("[U] Ameliorer un batiment\n");
-		printf("[R] Rembourser le premier pret\n");
-		printf("[P] Passer un jour\n");
-		printf("[Q] Quitter\n");
-		printf("\n");
 
 		while (!kbhit())
-			;
+		{
+			pjeu->days++;
+			pjeu->pplayer->money += pjeu->pplayer->gainsM;
 
+			system("cls");
+			printf("/ Jour %d / %de / +%de /\n", pjeu->days, pjeu->pplayer->money, pjeu->pplayer->gainsM);
+			printf("/ %d habitants dont %d loges/ %f / %f /\n", pjeu->population, pjeu->loges, pjeu->natalite, pjeu->mortalite);
+			printf("/ Nourriture %d / +%dn /\n", pjeu->nourriture, pjeu->pplayer->gainsN);
+			printf("/ Prets [%d]", pjeu->plisteP->nbrElements);
+			afficherPrets(pjeu);
+			printf(" /\n");
+
+			afficherTab(pjeu);
+			majBat(pjeu);
+			timerPrets(pjeu);
+			ev_Pop(pjeu);
+			ev_Nouriture(pjeu);
+			printf("Entites [%d]: ", pjeu->listeEntits->nbrElements);
+			entite *pb = pjeu->listeEntits->tete;
+			while (pb != NULL)
+			{
+				if (pb->ID != 0 && pb->ID != 1)
+					printf("%s ", getEntiteName(pb->ID));
+				pb = pb->suivant;
+			}
+			printf("\n\n");
+
+			printf("[N] Construire\n");
+			printf("[B] Nouveau pret sur 5 ans\n");
+			printf("[U] Ameliorer un batiment\n");
+			printf("[R] Rembourser le premier pret\n");
+			printf("[P] Passer un jour\n");
+			printf("[E] Nouvelle parcelle\n");
+			printf("[Q] Quitter\n");
+			printf("\n");
+			Sleep(250);
+		}
 		char key = getch();
 		if (key == 'n')
 			construireBat(pjeu);
 
 		if (key == 'b')
-		{
-			pj->money *= 3;
 			newPret(pjeu);
-		}
 
 		if (key == 'u')
 			upgrade(pjeu);
@@ -84,7 +82,10 @@ int main()
 
 		if (key == 'r')
 			rembourserPret(pjeu);
-	}
 
+		if (key == 'e')
+			acheterTerrain(pjeu);
+	}
+	continuer = state(pjeu);
 	return 0;
 }
